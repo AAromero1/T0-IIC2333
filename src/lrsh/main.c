@@ -3,10 +3,15 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include "../input_manager/manager.h"
+#include <sys/types.h>
+#include <sched.h>
+
+void suma(float first, float second, pid_t asdas);
 
 int main(int argc, char const *argv[])
 {
   char** input;
+  pid_t asdas;
 
   while (true)
   {
@@ -19,13 +24,19 @@ int main(int argc, char const *argv[])
     }
     else if (strcmp(input[0], "hello") == 0)
     {
-      printf("My Arch ;)\n");
+      hellowolrd(asdas);
     }
-    else if(strcmp(input[0], "pwd") == 0)
+    else if(strcmp(input[0], "sum") == 0)
     {
-      char cwd[1024];
-      getcwd(cwd, sizeof(cwd));
-      printf("Current working dir: %s\n", cwd);
+      float first = atof(input[1]);
+      float second = atof(input[2]);
+
+      suma(first, second, asdas);
+    }
+    else if(strcmp(input[0], "is_prime") == 0)
+    {
+      long long number = strtoll(input[1],NULL,10);
+      isPrime(number, asdas);
     }
     else if(strcmp(input[0], "ls") == 0)
     {
@@ -38,7 +49,68 @@ int main(int argc, char const *argv[])
   }
   
   free_user_input(input);
-
-
 }
 
+void hellowolrd(pid_t asdas)
+{
+  asdas = fork(); 
+  if(asdas == 0)
+  {
+    printf("Hello World\n");
+    printf("Im the child\n");
+    exit(0);
+  }
+  else
+  {
+    wait(NULL);
+  }
+  
+}
+
+void suma(float first, float second, pid_t asdas)
+{
+  asdas = fork();
+
+  float total = 0;
+
+   if(asdas == 0)
+  {
+    total = first + second;
+    printf(" Child The sum is: %f\n", total);
+    exit(0);
+  }
+
+  else
+  {
+    wait(NULL);
+  }
+}
+
+void isPrime(long long number, pid_t asdas)
+{
+  asdas = fork();
+
+  if(asdas == 0)
+  {
+    long long i;
+    bool isPrime = true;
+
+    for(i = 2; i <= number / 2; ++i)
+    {
+      if(number % i == 0)
+      {
+        isPrime = false;
+        break;
+      }
+    }
+    if (isPrime)
+      printf("%lld is a prime number.\n", number);
+    else
+      printf("%lld is not a prime number.\n", number);
+    exit(0);
+  }
+  else
+  {
+    wait(NULL);
+  }
+}
