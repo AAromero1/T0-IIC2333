@@ -38,9 +38,9 @@ int main(int argc, char const *argv[])
       long long number = strtoll(input[1],NULL,10);
       isPrime(number, asdas);
     }
-    else if(strcmp(input[0], "ls") == 0)
+    else if(strcmp(input[0], "lrexec") == 0)
     {
-      system("ls");
+      lrexect(input, asdas);
     }
     else
     {
@@ -107,6 +107,20 @@ void isPrime(long long number, pid_t asdas)
       printf("%lld is a prime number.\n", number);
     else
       printf("%lld is not a prime number.\n", number);
+    exit(0);
+  }
+  else
+  {
+    wait(NULL);
+  }
+}
+
+void lrexect(char **input, pid_t asdas)
+{
+  asdas = fork();
+  if(asdas == 0)
+  {
+    execvp(input[1], input);
     exit(0);
   }
   else
