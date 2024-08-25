@@ -46,9 +46,10 @@ int main(int argc, char const *argv[])
     {
       printf("Command not found\n");
     }
+    free_user_input(input);
   }
   
-  free_user_input(input);
+  
 }
 
 void hellowolrd(pid_t asdas)
@@ -117,14 +118,38 @@ void isPrime(long long number, pid_t asdas)
 
 void lrexect(char **input, pid_t asdas)
 {
-  asdas = fork();
-  if(asdas == 0)
-  {
-    execvp(input[1], input);
-    exit(0);
-  }
-  else
-  {
-    wait(NULL);
-  }
+    asdas = fork();
+    if(asdas == 0)
+    {
+        char **copy;
+        int i;
+        int count = 0;
+        for (i = 1; input[i] != NULL; i++) {
+            count++;
+        }
+
+        copy = (char**)calloc((count + 1), sizeof(char*));
+        for (i = 1; input[i] != NULL; i++) {
+            copy[i - 1] = strdup(input[i]);
+        }
+        copy[count] = NULL; 
+
+        for (i = 0; i <= count; i++) {
+            printf("Argument %d: %s\n", i, copy[i]);
+        }
+
+        execvp(input[1], copy);
+
+        perror("execvp failed");
+        for (i = 0; i < count; i++) {
+            free(copy[i]);
+        }
+        free(copy);
+
+        exit(1);  
+    }
+    else
+    {
+        wait(NULL);
+    }
 }
