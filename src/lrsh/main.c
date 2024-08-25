@@ -40,7 +40,7 @@ int main(int argc, char const *argv[])
     }
     else if(strcmp(input[0], "lrexec") == 0)
     {
-      lrexect(input, asdas);
+      lrexec(input, asdas);
     }
     else
     {
@@ -116,7 +116,7 @@ void isPrime(long long number, pid_t asdas)
   }
 }
 
-void lrexect(char **input, pid_t asdas)
+void lrexec(char **input, pid_t asdas)
 {
     asdas = fork();
     if(asdas == 0)
