@@ -12,6 +12,7 @@ typedef struct process_t{
     time_t end_time;   
     int exit_code;
     struct process_t *next;
+    struct process_t *back;
 
 } Process;
 

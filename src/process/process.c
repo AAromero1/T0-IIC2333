@@ -49,6 +49,7 @@ void insert_process(Process **head, Process *new_process)
             current = current->next;
         }
         current->next = new_process;
+        new_process->back = current;
     }
 }
 

@@ -6,7 +6,12 @@
 #include "../process/process.h"
 #include <sys/types.h>
 #include <sched.h>
+#include <signal.h>
+#include <sys/wait.h>
 
+void handle_sign(int sign);
+
+Process *global_process;
 
 void suma(float first, float second, pid_t asdas, Process **head);
 
@@ -16,6 +21,10 @@ int main(int argc, char const *argv[])
   pid_t head_pid;
 
   Process* head = create_process("head", getpid());
+
+  global_process = head;
+
+  signal(SIGINT, handle_sign);
   
 
   while (true)
@@ -32,7 +41,7 @@ int main(int argc, char const *argv[])
 
     else if (strcmp(input[0], "hello") == 0)
     {
-      hellowolrd(head_pid, &head);
+      helloworld(head_pid, &head);
     }
 
     else if(strcmp(input[0], "sum") == 0)
@@ -59,6 +68,10 @@ int main(int argc, char const *argv[])
       print_processes(head);
     }
 
+    else if(strcmp(input[0], "lrexit") == 0) {
+      lrexit(&head);
+    }
+
     else
     {
       printf("Command not found\n");
@@ -69,7 +82,7 @@ int main(int argc, char const *argv[])
   free_user_input(input);
 }
 
-void hellowolrd(pid_t child, Process **head)
+void helloworld(pid_t child, Process **head)
 {
   child = fork(); 
   if(child == 0)
@@ -207,4 +220,67 @@ void print_processes(Process *head) {
 
     current = current->next;
   }
+}
+
+void lrexit(Process **head) {
+  Process *current = *head;
+
+  printf("Exit\n");
+
+  while(current->next != NULL) {
+    current = current->next;
+  }
+
+  //printf("Llego al final de la lista ligada\n");
+
+  while(current != NULL) {
+    if (current->exit_code == -1 && current->pid > 0 && current->pid != getpid()) {
+      //printf("Entro al kill\n");
+      kill(current->pid, SIGINT);
+    }
+    //printf("Cambiando del proceso PID: %d\n", current->pid);
+    current = current->back;
+  };
+  
+  //printf("Parte el sleep\n");
+
+  sleep(10);
+
+  //printf("Termina el sleep\n");
+
+  current = *head;
+
+  while(current->next != NULL) {
+    current = current->next;
+  }
+  //printf("Busca si mandar SIGKILL");
+  while (current != NULL) {
+    if (current->pid > 0 && current->exit_code == -1 && current->pid != getpid()) {
+      int status;
+      pid_t result = waitpid(current->pid, &status, WNOHANG);
+
+      if (result == 0) {
+        //printf("Mandando SIGKILL\n");
+
+        kill(current->pid, SIGKILL);
+        waitpid(current->pid, &status, 0);
+
+        update_process_status(*head, current->pid, WEXITSTATUS(status));
+      }
+      else {
+        update_process_status(*head, current->pid, WEXITSTATUS(status));
+      }
+    }
+    current = current->back;
+  }
+
+  //printf("Termino de mandar SIGKILL");
+  free_processes(*head);
+  exit(0);
+}
+
+void handle_sign(int sig) {
+  printf("Goodbye!\n");
+
+  lrexit(&global_process);
 }
