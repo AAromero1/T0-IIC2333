@@ -23,11 +23,13 @@ Process* create_process( char *name, pid_t pid)
 
 void update_process_status(Process *head, pid_t pid, int exit_code) {
     Process *current = head;
-    printf("Updating process status\n");
-    printf("Exit Code: %d\n", exit_code);
     while (current != NULL) {
-        if (current->pid == pid) {
+        if (current->pid == pid && current->exit_code != -1) {
             current->end_time = time(NULL);  
+            current->exit_code = exit_code;
+            break;
+        }
+        else if(current->pid == pid && current->exit_code == -1) {
             current->exit_code = exit_code;
             break;
         }

@@ -10,6 +10,7 @@
 #include <sys/wait.h>
 
 void handle_sign(int sign);
+void handle_sigchld(int sign);
 
 Process *global_process;
 
@@ -24,47 +25,40 @@ int main(int argc, char const *argv[])
 
   global_process = head;
 
+  signal(SIGCHLD, handle_sigchld);
   signal(SIGINT, handle_sign);
   
 
-  while (true)
-  {
+  while (true) {
     printf("Enter a command: ");
     input = read_user_input();
     printf("%s\n", input[0]);
 
-    if (strcmp(input[0], "exit") == 0)
-    {
+    if (strcmp(input[0], "exit") == 0) {
       free_processes(head);
       break;
     }
 
-    else if (strcmp(input[0], "hello") == 0)
-    {
+    else if (strcmp(input[0], "hello") == 0) {
       helloworld(head_pid, &head);
     }
 
-    else if(strcmp(input[0], "sum") == 0)
-    {
+    else if(strcmp(input[0], "sum") == 0) {
       float first = atof(input[1]);
       float second = atof(input[2]);
-
       suma(first, second, head_pid, &head);
     }
 
-    else if(strcmp(input[0], "is_prime") == 0)
-    {
+    else if(strcmp(input[0], "is_prime") == 0) {
       long long number = strtoll(input[1],NULL,10);
       isPrime(number, head_pid, &head);
     }
 
-    else if(strcmp(input[0], "lrexec") == 0)
-    {
+    else if(strcmp(input[0], "lrexec") == 0) {
       lrexec(input, head_pid, &head);
     }
 
-    else if(strcmp(input[0], "lrlist") == 0)
-    {
+    else if(strcmp(input[0], "lrlist") == 0) {
       print_processes(head);
     }
 
@@ -72,98 +66,81 @@ int main(int argc, char const *argv[])
       lrexit(&head);
     }
 
-    else
-    {
+    else {
       printf("Command not found\n");
     }
 
     free_user_input(input);
   }
   free_user_input(input);
-}
-
-void helloworld(pid_t child, Process **head)
-{
-  child = fork(); 
-  if(child == 0)
-  {
-    printf("Hello World\n");
-    printf("Im the child\n");
-    exit(0);
   }
-  else
-  {
+
+void helloworld(pid_t child, Process **head) {
+  child = fork(); 
+  if(child == 0) {
+    printf("Hello, this is my first shell\n");
+    exit(0);
+  } 
+  else if (child > 0) {
     Process* new_process = create_process("hello", child);
     insert_process(head, new_process);
-    int status;
-    waitpid(child, &status, 0);
-    update_process_status(*head, child, WEXITSTATUS(status));
-
+      // Dont wait here
+  } else {
+    perror("fork failed");
   }
 }
 
-void suma(float first, float second, pid_t child, Process **head)
-{
+void suma(float first, float second, pid_t child, Process **head) {
   child = fork();
 
-  float total = 0;
-
-   if(child == 0)
-  {
-    total = first + second;
+  if(child == 0) {
+    float total = first + second;
     printf(" Child The sum is: %f\n", total);
     exit(0);
-  }
-
-  else
-  {
+  } else if (child > 0) {
     Process* new_process = create_process("sum", child);
     insert_process(head, new_process);
-    int status;
-    waitpid(child, &status, 0);
-    update_process_status(*head, child, WEXITSTATUS(status));
+    // Dont wait here
+  } else {
+    perror("fork failed");
   }
 }
 
-void isPrime(long long number, pid_t child, Process **head)
-{
+void isPrime(long long number, pid_t child, Process **head) {
   child = fork();
 
-  if(child == 0)
-  {
+  if(child == 0) {
     long long i;
     bool isPrime = true;
 
-    for(i = 2; i <= number / 2; ++i)
-    {
-      if(number % i == 0)
-      {
+    for(i = 2; i <= number / 2; ++i) {
+      if(number % i == 0) {
         isPrime = false;
         break;
       }
     }
     if (isPrime)
       printf("%lld is a prime number.\n", number);
+
     else
       printf("%lld is not a prime number.\n", number);
+
     exit(0);
-  }
-  else
-  {
-    Process* new_process = create_process("sum", child);
+  } 
+  else if (child > 0) {
+    Process* new_process = create_process("is_prime", child);
     insert_process(head, new_process);
-    int status;
-    waitpid(child, &status, 0);
-    update_process_status(*head, child, WEXITSTATUS(status));
+    // Dont wait here
+  } 
+  else {
+    perror("fork failed");
   }
 }
 
-void lrexec(char **input, pid_t child, Process **head)
-{
+void lrexec(char **input, pid_t child, Process **head) {
   child = fork();
 
-  if(child == 0)
-  {
+  if(child == 0) {
     char **copy;
     int i;
     int count = 0;
@@ -173,7 +150,7 @@ void lrexec(char **input, pid_t child, Process **head)
 
     copy = (char**)calloc((count + 1), sizeof(char*));
     for (i = 1; input[i] != NULL; i++) {
-        copy[i - 1] = strdup(input[i]);
+      copy[i - 1] = strdup(input[i]);
     }
     copy[count] = NULL; 
 
@@ -181,40 +158,46 @@ void lrexec(char **input, pid_t child, Process **head)
 
     perror("execvp failed");
     for (i = 0; i < count; i++) {
-        free(copy[i]);
+      free(copy[i]);
     }
     free(copy);
 
-    exit(1);  
-  }
-  else
-  {
+      exit(1);  
+  } 
+  else if (child > 0) {
     Process* new_process = create_process(input[1], child);
     insert_process(head, new_process);
-    int status;
-    waitpid(child, &status, 0);
-    update_process_status(*head, child, WEXITSTATUS(status));
+    // dont wait here
+  } 
+  else {
+    perror("fork failed");
   }
 }
 
 void print_processes(Process *head) {
   Process *current = head;
   while(current != NULL) {
+
     if (current->name != NULL) {
       printf("Name: %s\n", current->name);
+
     } else {
       printf("Unnamed process\n");
     }
+
     printf("PID: %d\n", current->pid);
 
-    
-    if (current->end_time >= 0 && current->start_time >= 0) {
+    if (current->end_time >= 0 && current->start_time >= 0 && current->exit_code >= 0) {
 
-      double elapsed_time = difftime(current->end_time, current->start_time);
+      double elapsed_time = current->end_time - current->start_time;
+      printf("Time: %f seconds\n", elapsed_time);
+
+    } 
+    else if (current->exit_code == -1) {
+      double elapsed_time = time(NULL) - current->start_time;
+      printf("Time: is still running\n");
       printf("Time: %.0f seconds\n", elapsed_time);
 
-    } else if (current->exit_code == -1) {
-      printf("Time: Not finished\n");
     }
     printf("Exit Code: %d\n", current->exit_code);
 
@@ -242,11 +225,9 @@ void lrexit(Process **head) {
     current = current->back;
   };
   
-  //printf("Parte el sleep\n");
-
+  printf("Waiting for processes to finish\n");
   sleep(10);
-
-  //printf("Termina el sleep\n");
+  printf("Processes did not finish, sending SIGKILL\n");
 
   current = *head;
 
@@ -283,4 +264,13 @@ void handle_sign(int sig) {
   printf("Goodbye!\n");
 
   lrexit(&global_process);
+}
+
+void handle_sigchld(int sig) {
+    int status;
+    pid_t pid;
+
+    while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+        update_process_status(global_process, pid, WEXITSTATUS(status));
+    }
 }
