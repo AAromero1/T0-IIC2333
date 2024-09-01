@@ -1,8 +1,8 @@
-# Tarea 0 Sistemas Operativos y Redes#
+# :mortar_board: Tarea 0 Sistemas Operativos y Redes :mortar_board: # 
 
 ## Alvaro Romero - Fabian Mendoza ##
 
-### Informacion general ###   
+### Informacion general :page_facing_up: ###   
 
 * Para compilar la tarea se tiene que usar el comando ```make``` en el mismo directorio de T0-IIC2333.
 * La estructura de la tarea corresponde a:
@@ -26,7 +26,7 @@
 
 * Finalmente comentar que para dar inicio a la ejecucion de la consola se tiene que usar ```./lrsh```
 
-### Descripcion de las funcionalidades implementadas ###
+### Descripcion de las funcionalidades implementadas :clipboard: ###
 
 1. ```hello``` : Al escribir "hello" en la consola, esta genera un nuevo proceso con fork, el cual imprime fork, para despues guardarse en la lista ligada de procesos.
 
