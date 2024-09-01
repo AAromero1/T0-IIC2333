@@ -1,10 +1,10 @@
-# Tarea 0 Sistemas Operativos #
+# Tarea 0 Sistemas Operativos y Redes#
 
 ## Alvaro Romero - Fabian Mendoza ##
 
 ### Informacion general ###   
 
-* Para compilar la tarea se tiene que usar ```make``` en el mismo directorio de T0-IIC2333.
+* Para compilar la tarea se tiene que usar el comando ```make``` en el mismo directorio de T0-IIC2333.
 * La estructura de la tarea corresponde a:
 
 - / (T0-IIC2333)
@@ -29,8 +29,13 @@
 ### Descripcion de las funcionalidades implementadas ###
 
 1. ```hello``` : Al escribir "hello" en la consola, esta genera un nuevo proceso con fork, el cual imprime fork, para despues guardarse en la lista ligada de procesos.
+
 2. ```sum <num_1> <num_2>``` : Al escribir "sum" seguido de dos numeros, se separa el input del usuario en los dos numeros que se reciben como argumento, los cuales son pasados a una funcion que crea un nuevo proceso con fork, el cual ejecuta la suma con los parametros recibidos. Finalemnte se agrega en la lista ligada de procesos.
+
 3. ```is_prime <num>``` : Al escribir "is_prime" seguido de un numero, se convierte el numero que acompaña a esa instruccion a un long long number, el cual es pasado a una funcion, esta funcion genera un nuevo proceso con fork para que despues este proceso hijo ejecute la verificacion del numero y ver si es primo o no. Finalmente, se agrega a la lista ligada de procesos.
+
 4. ```lrexec <executable> <arg1> <arg2> ... <argn>``` : Al escribir "lrexec" seguido de un ejecutable y sus argumentos, se crea un proceso hijo con fork, el que junta los parametros y ejecutable entregados en un array, para despues entregarlos a ```execvp``` el cual recibe como parametro un array de la forma ```["ejecutable", "argumentos", NULL]```, despues se agrega el proceso a la lista ligada de procesos.
+
 5. ```lrlist``` : Al escribir "lrlist" se ejecuta in ciclo que recorre la lista ligada imprimiendo los procesos y su informacion guardada al momento de ingresarlos a la lista.
+
 6. ```lrexit``` : Al escribir "lrexit" o presionar ctrl + c, se ejecuta un ciclo que recorre la lista ligada de atras hacia adelante mandando la señal SIGINT a cada proceso con el metodo kill(), despues espera 10 segundos y repite el ciclo, recorriendo de atras hacia adelante, pero esta vez enviando SIGKILL con el metodo kill().
