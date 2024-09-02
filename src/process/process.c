@@ -24,12 +24,12 @@ Process* create_process( char *name, pid_t pid)
 void update_process_status(Process *head, pid_t pid, int exit_code) {
     Process *current = head;
     while (current != NULL) {
-        if (current->pid == pid && current->exit_code != -1) {
+        if (current->pid == pid && exit_code != -1) {
             current->end_time = time(NULL);  
             current->exit_code = exit_code;
             break;
         }
-        else if(current->pid == pid && current->exit_code == -1) {
+        else if(current->pid == pid && exit_code == -1) {
             current->exit_code = exit_code;
             break;
         }
