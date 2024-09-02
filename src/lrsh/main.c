@@ -13,12 +13,13 @@ void handle_sign(int sign);
 void handle_sigchld(int sign);
 
 Process *global_process;
+bool exit_console = false;
+char** input = NULL;
 
 void suma(float first, float second, pid_t asdas, Process **head);
 
 int main(int argc, char const *argv[])
 {
-  char** input;
   pid_t head_pid;
 
   Process* head = create_process("head", getpid());
@@ -30,6 +31,12 @@ int main(int argc, char const *argv[])
   
 
   while (true) {
+
+    if (exit_console) {
+      lrexit(&head);
+      break;
+    }
+
     printf("Enter a command: ");
     input = read_user_input();
     printf("%s\n", input[0]);
@@ -66,13 +73,13 @@ int main(int argc, char const *argv[])
       lrexit(&head);
     }
 
-    else {
+    else if (exit_console == false) {
       printf("Command not found\n");
     }
 
     free_user_input(input);
+    input = NULL;
   }
-  free_user_input(input);
   }
 
 void helloworld(pid_t child, Process **head) {
@@ -257,13 +264,16 @@ void lrexit(Process **head) {
 
   //printf("Termino de mandar SIGKILL");
   free_processes(*head);
+  if (input) {
+    free_user_input(input);
+  }
+
   exit(0);
 }
 
 void handle_sign(int sig) {
-  printf("Goodbye!\n");
-
-  lrexit(&global_process);
+  printf("\nPress enter to confirm\n");
+  exit_console = true;
 }
 
 void handle_sigchld(int sig) {
